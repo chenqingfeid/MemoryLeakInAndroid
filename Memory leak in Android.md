@@ -24,7 +24,7 @@ Java语言的核心特点之一就是是它的垃圾回收机制，从本质上�
 
 这里我就不展开说明了，简单说明一下，堆栈用于静态内存分配，而堆用于 动态内存分配。
 
-![](https://docimg3.docs.qq.com/image/42pzaAwPjlZXZ16V4tPzKg?w=649&h=447)
+![stack_heap](./res/stack_heap.png)
 
 #### 那么它在现实中到底是如何运作？
 
@@ -48,7 +48,7 @@ class Memory {
 
 我们看下程序的执行步骤
 
-![](https://qqadapt.qpic.cn/txdocpic/0/157b19426e38da753f5c8abcaa617655/0?w=1073&h=569)
+![stack_heap](./res/01.png)
 
 ```java
 public static void main(String[] args) { //line 1
@@ -108,16 +108,14 @@ String str = param.toString(); //line 7
 
 每个函数都有自己的作用域，当函数执行完成后，在栈帧中创建的变量会自动释放并从栈中回收。
 
-![](https://qqadapt.qpic.cn/txdocpic/0/832fac78227ef0ed810cd1d84bb8445d/0?w=1073&h=569)
+![](./res/02.png)
 
 <center>图1</center>
-
 在**上图中**，`foo`完成该功能后，将自动释放/回收foo栈帧及其所有变量。
 
-![](https://docimg1.docs.qq.com/image/mjF_madqN287wot-Zdl3ow?w=1073&h=569)
+![](./res/03.png)
 
 <center>图2</center>
-
 与`foo`功能相同，当`main`功能结束时，该栈帧也被释放。
 
 因此，现在我们已经了解到栈中的对象是临时的，并且在完成功能后将立即释放它们。
@@ -130,7 +128,7 @@ String str = param.toString(); //line 7
 
 #### 垃圾回收器如何工作？
 
-​	![](https://qqadapt.qpic.cn/txdocpic/0/9232184873aaa1e1e7c7abdf8b7f4291/0?w=1200&h=627)
+![](./res/04.png)
 
 垃圾回收器正在寻找无法访问的对象，换句话说，如果堆中有一个不包含任何对它的引用的对象，它将被释放
 
@@ -138,7 +136,7 @@ String str = param.toString(); //line 7
 
 **当堆中仍有未使用的对象仍在栈中引用时**,为了直观的理解，下面是一个简单的视觉表示
 
-​	![](https://qqadapt.qpic.cn/txdocpic/0/2b92c403dc2f18e690414ed483d2e622/0?w=650&h=400)
+![](./res/05.png)
 
 
 
@@ -149,7 +147,7 @@ String str = param.toString(); //line 7
 **导致内存泄漏的点可能有各种姿势，概况来说，主要就三类。**
 
 1. Activity 引用泄漏到工作线程
-2. 将Activity 上下文泄漏到静态引用中
+2. Activity 上下文泄漏到静态引用中
 3. 工作线程本身的泄漏
 
 
@@ -191,27 +189,27 @@ public class ThreadActivity extends Activity {
 
 启动 ThreadActivity， ActivityThread 执行 Activity 创建流程 ，那么此时ThreadActivity 对象会在堆中创建，并且main方法中持有 activity的引用，接着执行到 onCreate方法 ，onCreate方法会在栈中创建一个新的栈帧压入栈中，然后在onCreate方法中我们创建了DownloadThread ，最后我们start DownloadThread onCreate方法执行结束 ，当线程启动后，run方法被执行，那么此时run方法创建的栈帧也会压入栈，在run方法中sleep 20秒
 
-![](https://qqadapt.qpic.cn/txdocpic/0/35121c490b46db48cb1a9b053bfb5f3b/0?w=1148&h=636)
+![](./res/06.png)
 
 在正常情况下用户打开Activity 等待  20秒，直到完成下载任务。
 
-![](https://qqadapt.qpic.cn/txdocpic/0/e5780abd8eef301fa591d85312851062/0?w=1112&h=610)
+![](./res/07.png)
 
 完成任务后,堆栈释放所有对象。
 
-![img](https://qqadapt.qpic.cn/txdocpic/0/f25d4051d4f159523ce4c6799a4bf892/0?w=1112&h=610)
+![](./res/08.png)
 
 然后，下一次垃圾收集器工作时，堆中创建的DownloadTask对象被释放
 
-![](https://qqadapt.qpic.cn/txdocpic/0/d0d0caf6bdbc9f05cbb2e6268230fccd/0?w=1112&h=610)
+![](./res/09.png)
 
 并且当用户关闭活动时，main方法将从堆栈中释放，ThreadActivity也将从堆中回收，一切都按需工作，没有泄漏。
 
-![](https://qqadapt.qpic.cn/txdocpic/0/c1b48d8ebd5589fdaa7764137c2acf0e/0?w=1073&h=569)
+![](./res/10.png)
 
 然而，现实并没有想想的这么美好，如果当用户在10秒后把Activity关闭，那结果就炸了
 
-![](https://qqadapt.qpic.cn/txdocpic/0/dcfbd65d2b5fc20e577ad38f3452442d/0?w=1112&h=610)
+![](./res/11.png)
 
 是不是已经明白了什么，Activity 结束后 main的栈帧从栈中弹出，但是，run方法还未执行完毕，DownloadTask中还持有Activty的引用，那么在堆中创建的Activity对象就不会被垃圾收集器回收，内存就这样泄漏了
 
@@ -219,7 +217,7 @@ public class ThreadActivity extends Activity {
 
 **注意：**完成download run（）任务后，堆栈释放对象。因此，当垃圾回收器下次工作时，由于没有引用对象，最后对象从堆中回收。
 
-![](https://qqadapt.qpic.cn/txdocpic/0/bc81206608c3f16804e0d418bb4b9952/0?w=1112&h=610)
+![](./res/12.png)
 
 ### 
 
@@ -385,21 +383,19 @@ public class ThreadActivity1 extends Activity {
 
 发生内存泄漏时，可用内存较少。结果，Android系统将触发更频发的GC事件。GC被触发这意味着 CPU时间片会被抢夺，那么就会导致UI线程所获得的时间片资源变少，Android有一个16ms的 drawing window。当GC花费的时间超过此时间时，Android将开始丢失帧。通常，100到200ms是阈值，超过此阈值，用户讲感觉到应用程序运行缓慢
 
-![img](https://qqadapt.qpic.cn/txdocpic/0/a506f26e07651ad915513487acbbd4d6/0?w=425&h=197)
+![](./res/13.png)
 
 <center>Android Draw Window</center>
-
-![img](https://qqadapt.qpic.cn/txdocpic/0/d15e9a1c7eec00fafe3dc594a6cfd493/0?w=401&h=253)
+![](./res/14.png)
 
 <center>由于频发的GC而丢失帧</center>
-
 #### 2. ANR
 
 内存泄漏可能导致ANR错误（应用程序无响应），为什么会发生ANR？
 
 上文已经提到过内存泄漏导致内存不足，系统会频繁触发GC，大家都知道GC会导致CPU资源被占用，那么在Android中，Activity 响应超时时间是5s 如果由于频繁GC 导致主线程在5秒内没有响应输入事件（例如按键或屏幕触摸事件），那么Android系统将会弹出ANR的对话框，当然广播即是不是在UI上发生的，广播和service同样会产生ANR
 
-![](https://qqadapt.qpic.cn/txdocpic/0/93ff65f96a9ccf415bdb5fb5b2935750/0?w=540&h=290)
+![](./res/15.png)
 
 我确定，任何一个Android用户都不喜欢看到这个界面，如果频发出现那真的要考虑卸载了。
 
@@ -417,7 +413,7 @@ public class ThreadActivity1 extends Activity {
 
 #### 4.泄漏的内存有多大
 
-并非所有的内存泄漏都相等。有些泄漏了几千KB。有些可能会泄漏许多MB。这个一般由在内存中开辟内存的单元来决定，例如一个Activity 发生泄漏其实所占内存还是比较大的。
+并非所有的内存泄漏都相等。从几千KB 到 几十MB。这个一般由在内存中开辟内存的单元来决定，例如一个Service 发生泄漏其实所占内存还是比较大的。
 
 #### 5. 泄漏的对象在内存中保留多长时间
 
@@ -448,11 +444,11 @@ public class ThreadActivity1 extends Activity {
 
    
 
-   ![](https://docimg8.docs.qq.com/image/bA_YyoLlS4NzL9vjvMqkTw?w=1400&h=678)
+   ![](./res/16.png)
 
 2. Android Studio 也为我们提供了很多方便的工具，例如[Profiler](https://developer.android.com/studio/profile/android-profiler)使用Memory Profiler查看Java堆和内存分配 以及  Android Monitor等
 
-   ![](https://qqadapt.qpic.cn/txdocpic/0/832d0292bf45b7680e74709a6e3ffc8c/0?w=871&h=576)
+   ![](./res/17.png)
 
 
 
